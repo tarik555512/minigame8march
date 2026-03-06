@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра: Букет для мамы</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #fff5f8;
+            font-family: 'Arial', sans-serif;
+            touch-action: manipulation;
+        }
+
+        #game-ui {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 24px;
+            color: #d81b60;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .flower {
+            position: absolute;
+            font-size: 40px;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.2s;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));
+        }
+
+        .flower:hover {
+            transform: scale(1.2);
+        }
+
+        #basket {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 60px;
+            z-index: 50;
+        }
+
+        #win-screen {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 0 50px rgba(216, 27, 96, 0.3);
+            text-align: center;
+            z-index: 200;
+            width: 80%;
+            max-width: 400px;
+        }
+
+        button {
+            background: #ff4081;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-ui">Собрано цветов: <span id="score">0</span> / 10</div>
+<div id="basket">🧺</div>
+
+<div id="win-screen">
+    <h2 style="color: #d81b60;">Ура! Букет собран! 💐</h2>
+    <p>Мамочка, этот виртуальный букет для тебя! С 8 Марта!</p>
+    <button onclick="location.reload()">Играть снова</button>
+</div>
+
+<script>
+    let score = 0;
+    const scoreElement = document.getElementById('score');
+    const winScreen = document.getElementById('win-screen');
+    const flowerIcons = ['🌸', '🌷', '🌹', '🌺', '🌼', '🌻'];
+
+    function createFallingFlower() {
+        if (score >= 10) return;
+
+        const flower = document.createElement('div');
+        flower.className = 'flower';
+        flower.innerText = flowerIcons[Math.floor(Math.random() * flowerIcons.length)];
+        
+        // Позиция появления
+        flower.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+        flower.style.top = '-50px';
+        
+        document.body.appendChild(flower);
+
+        let topPos = -50;
+        const speed = Math.random() * 2 + 2; // Скорость падения
+
+        const fallInterval = setInterval(() => {
+            topPos += speed;
+            flower.style.top = topPos + 'px';
+
+            // Если цветок улетел вниз (пропущен)
+            if (topPos > window.innerHeight) {
+                clearInterval(fallInterval);
+                flower.remove();
+            }
+        }, 20);
+
+        // Клик по цветку
+        flower.onclick = () => {
+            score++;
+            scoreElement.innerText = score;
+            clearInterval(fallInterval);
+            
+            // Анимация полета в корзину
+            flower.style.transition = 'all 0.5s ease-in';
+            flower.style.left = '50%';
+            flower.style.top = (window.innerHeight - 80) + 'px';
+            flower.style.transform = 'scale(0.5) translateX(-50%)';
+            flower.style.opacity = '0';
+
+            setTimeout(() => {
+                flower.remove();
+                if (score === 10) {
+                    winScreen.style.display = 'block';
+                }
+            }, 500);
+        };
+    }
+
+    // Создавать новый цветок каждую секунду
+    setInterval(createFallingFlower, 1000);
+</script>
+
+</body>
+</html>
